@@ -285,6 +285,33 @@ func parseAcceptHeader(header string) []string {
 	return values
 }
 
+// InboundForResponse returns the inbound Content-Type and marshalers for this response.
+// It checks the registry on the Encoding for the MIME type set by the Content-Type header.
+// If it isn't set (or the response Content-Type is empty), checks for "*".
+// If there are multiple Content-Type headers set, choose the first one that it can
+// exactly match in the registry.
+// Otherwise, it follows the above logic for "*" Marshaler.
+func (r *Encoding) InboundForResponse(resp *http.Response) codec.Marshaler {
+	var err error
+	var marshaler codec.Marshaler
+	var contentType string
+
+	for _, contentTypeVal := range resp.Header[contentTypeHeader] {
+		contentType, _, err = mime.ParseMediaType(contentTypeVal)
+		if err != nil {
+			continue
+		}
+		if m, ok := r.mimeMap[contentType]; ok {
+			marshaler = m
+			break
+		}
+	}
+	if marshaler == nil {
+		marshaler = r.mimeMap[MIMEWildcard]
+	}
+	return marshaler
+}
+
 // Encode encode v use contentType
 func (r *Encoding) Encode(contentType string, v any) ([]byte, error) {
 	return r.Get(contentType).Marshal(v)
