@@ -18,6 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/things-go/encoding/codec"
+	"github.com/things-go/encoding/form"
 	"github.com/things-go/encoding/internal/examplepb"
 	"github.com/things-go/encoding/json"
 	"github.com/things-go/encoding/msgpack"
@@ -432,6 +433,7 @@ func TestEncoding_Bind(t *testing.T) {
 
 func TestEncoding_BindQuery(t *testing.T) {
 	registry := New()
+	require.NoError(t, registry.Register(MIMEQuery, form.New("json").EnableProto()))
 
 	tests := []struct {
 		name    string
@@ -494,6 +496,7 @@ func TestEncoding_BindQuery(t *testing.T) {
 
 func TestEncoding_BindUri(t *testing.T) {
 	registry := New()
+	require.NoError(t, registry.Register(MIMEURI, form.New("json").EnableProto()))
 
 	tests := []struct {
 		name    string
