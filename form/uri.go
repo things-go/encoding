@@ -45,7 +45,6 @@ func (c *Codec) EncodeURL(pathTemplate string, v any, needQuery bool) string {
 				return in
 			}
 			key := in[1 : len(in)-1]
-			fmt.Println(key)
 			vars := strings.Split(key, ".")
 			if value, err := getValueWithField(v, vars, c.TagName); err == nil {
 				pathParams[key] = struct{}{}
