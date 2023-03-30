@@ -74,7 +74,6 @@ func New() *Encoding {
 					},
 				},
 			},
-
 			MIMEPOSTForm:          form.New("json"),
 			MIMEMultipartPOSTForm: &form.MultipartCodec{Codec: form.New("json")},
 			MIMEJSON: &jsonpb.Codec{

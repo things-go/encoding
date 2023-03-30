@@ -15,14 +15,13 @@ type Codec struct {
 	Encoder *form.Encoder
 	Decoder *form.Decoder
 	TagName string
-	// UseProtoNames uses proto field name instead of lowerCamelCase name
-	// in JSON field names.
+	// UseProtoNames uses proto field name instead of
+	// lowerCamelCase name in JSON field names.
 	UseProtoNames bool
 }
 
 // New returns a new Codec,
-// default tag name is "json",
-// proto use protoJSON tag
+// default tag name is "json", and proto message use proto field.
 func New(tagName string) *Codec {
 	encoder := form.NewEncoder()
 	encoder.SetTagName(tagName)
@@ -43,6 +42,7 @@ func (c *Codec) DisableUseProtoNames() *Codec {
 	return c
 }
 
+// ContentType always Returns "application/x-www-form-urlencoded; charset=utf-8"
 func (*Codec) ContentType(_ interface{}) string {
 	return "application/x-www-form-urlencoded; charset=utf-8"
 }
