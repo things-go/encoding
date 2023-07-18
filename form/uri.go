@@ -89,7 +89,7 @@ func getValueFromProtoWithField(v protoreflect.Message, fieldPath []string) (str
 		}
 		v = v.Get(fd).Message()
 	}
-	return EncodeField(fd, v.Get(fd))
+	return EncodeField(fd, v.Get(fd), true)
 }
 
 func getValueWithField(s any, fieldPath []string, tagName string) (string, error) {

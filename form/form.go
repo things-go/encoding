@@ -18,6 +18,8 @@ type Codec struct {
 	// UseProtoNames uses proto field name instead of
 	// lowerCamelCase name in JSON field names.
 	UseProtoNames bool
+	// UseEnumNumbers emits enum values as numbers.
+	UseEnumNumbers bool
 }
 
 // New returns a new Codec,
@@ -32,6 +34,7 @@ func New(tagName string) *Codec {
 		decoder,
 		tagName,
 		true,
+		true,
 	}
 }
 
@@ -39,6 +42,12 @@ func New(tagName string) *Codec {
 // in JSON field names.
 func (c *Codec) DisableUseProtoNames() *Codec {
 	c.UseProtoNames = false
+	return c
+}
+
+// DisableUseProtoNames disable emits enum values as numbers.
+func (c *Codec) DisableUseEnumNumbers() *Codec {
+	c.UseEnumNumbers = false
 	return c
 }
 
@@ -85,7 +94,7 @@ func (c *Codec) Encode(v any) (url.Values, error) {
 	var err error
 
 	if m, ok := v.(proto.Message); ok {
-		vs, err = EncodeValues(m, c.UseProtoNames)
+		vs, err = EncodeValues(m, c.UseProtoNames, c.UseEnumNumbers)
 	} else {
 		vs, err = c.Encoder.Encode(v)
 	}
