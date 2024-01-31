@@ -103,27 +103,26 @@ func New() *Encoding {
 // you can override default marshaler with same MIME type
 func (r *Encoding) Register(mime string, marshaler codec.Marshaler) error {
 	if len(mime) == 0 {
-		return errors.New("empty MIME type")
+		return errors.New("encoding: empty MIME type")
 	}
 	if marshaler == nil {
-		return errors.New("marshaller should be not")
-	} else {
-		switch mime {
-		case MIMEQuery:
-			m, ok := marshaler.(codec.FormMarshaler)
-			if !ok {
-				return errors.New("marshaller should be implement codec.FormMarshaler")
-			}
-			r.mimeQuery = m
-		case MIMEURI:
-			m, ok := marshaler.(codec.UriMarshaler)
-			if !ok {
-				return errors.New("marshaller should be implement codec.FormMarshaler")
-			}
-			r.mimeUri = m
-		default:
-			r.mimeMap[mime] = marshaler
+		return errors.New("encoding: marshaller should be not")
+	}
+	switch mime {
+	case MIMEQuery:
+		m, ok := marshaler.(codec.FormMarshaler)
+		if !ok {
+			return errors.New("encoding: marshaller should be implement codec.FormMarshaler")
 		}
+		r.mimeQuery = m
+	case MIMEURI:
+		m, ok := marshaler.(codec.UriMarshaler)
+		if !ok {
+			return errors.New("encoding: marshaller should be implement codec.UriMarshaler")
+		}
+		r.mimeUri = m
+	default:
+		r.mimeMap[mime] = marshaler
 	}
 	return nil
 }
@@ -152,7 +151,7 @@ func (r *Encoding) Delete(mime string) error {
 	if mime == MIMEWildcard ||
 		mime == MIMEQuery ||
 		mime == MIMEURI {
-		return fmt.Errorf("MIME(%s) can't delete, you can override", mime)
+		return fmt.Errorf("encoding: MIME(%s) can't delete, you can override", mime)
 	}
 	delete(r.mimeMap, mime)
 	return nil
@@ -226,7 +225,7 @@ func (r *Encoding) Bind(req *http.Request, v any) error {
 	if contentType == MIMEMultipartPOSTForm {
 		m, ok := marshaller.(codec.FormCodec)
 		if !ok {
-			return fmt.Errorf("not supported marshaller(%v)", contentType)
+			return fmt.Errorf("encoding: not supported marshaller(%v)", contentType)
 		}
 		if err := req.ParseMultipartForm(defaultMemory); err != nil {
 			return err
@@ -247,7 +246,7 @@ func (r *Encoding) BindQuery(req *http.Request, v any) error {
 func (r *Encoding) BindUri(req *http.Request, v any) error {
 	raws := FromRequestUri(req)
 	if raws == nil {
-		return errors.New("must be request with uri in context")
+		return errors.New("encoding: must be request with uri in context")
 	}
 	return r.mimeUri.Decode(raws, v)
 }
