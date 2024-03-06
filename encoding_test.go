@@ -19,9 +19,9 @@ import (
 
 	"github.com/things-go/encoding/codec"
 	"github.com/things-go/encoding/form"
-	"github.com/things-go/encoding/internal/examplepb"
 	"github.com/things-go/encoding/json"
 	"github.com/things-go/encoding/msgpack"
+	"github.com/things-go/encoding/testdata/examplepb"
 )
 
 var marshalers = []dummyMarshaler{0, 1}

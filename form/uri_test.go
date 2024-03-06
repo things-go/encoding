@@ -3,7 +3,7 @@ package form
 import (
 	"testing"
 
-	"github.com/things-go/encoding/internal/examplepb"
+	"github.com/things-go/encoding/testdata/examplepb"
 )
 
 type NoProtoSub struct {

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package dyn.encoding.internal.examplepb;
+package dyn.encoding.testdata.examplepb;
 
 option go_package = "github.com/things-go/encoding/internal/examplepb";
 
