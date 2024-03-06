@@ -7,7 +7,7 @@ for PROTO in $PROTOS; do
   protoc \
     -I . \
     -I $(dirname $PROTO) \
-    -I ../example/third_party \
+    -I ./third_party \
     --go_out=. \
     --go_opt=paths=source_relative \
     $PROTO
