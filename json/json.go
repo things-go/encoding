@@ -15,7 +15,7 @@ import (
 // The NewEncoder and NewDecoder types return *json.Encoder and
 // *json.Decoder respectively.
 type Codec struct {
-	// UseNumber causes the Decoder to unmarshal a number into an interface{} as a
+	// UseNumber causes the Decoder to unmarshal a number into an any as a
 	// Number instead of as a float64.
 	UseNumber bool
 	// DisallowUnknownFields causes the Decoder to return an error when the destination
@@ -25,13 +25,13 @@ type Codec struct {
 }
 
 // ContentType always Returns "application/json; charset=utf-8".
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/json; charset=utf-8"
 }
-func (*Codec) Marshal(v interface{}) ([]byte, error) {
+func (*Codec) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
-func (*Codec) Unmarshal(data []byte, v interface{}) error {
+func (*Codec) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 func (c *Codec) NewDecoder(r io.Reader) codec.Decoder {

@@ -26,11 +26,11 @@ type Codec struct {
 }
 
 // ContentType always Returns "application/json; charset=utf-8".
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/json; charset=utf-8"
 }
 
-func (c *Codec) Marshal(v interface{}) ([]byte, error) {
+func (c *Codec) Marshal(v any) ([]byte, error) {
 	if _, ok := v.(proto.Message); !ok {
 		return c.marshalNonProtoField(v)
 	}
@@ -42,7 +42,7 @@ func (c *Codec) Marshal(v interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (c *Codec) marshalTo(w io.Writer, v interface{}) error {
+func (c *Codec) marshalTo(w io.Writer, v any) error {
 	p, ok := v.(proto.Message)
 	if !ok {
 		buf, err := c.marshalNonProtoField(v)
@@ -71,7 +71,7 @@ var (
 // it is only capable of marshaling non-message field values of protobuf,
 // i.e. primitive types, enums; pointers to primitives or enums; maps from
 // integer/string types to primitives/enums/pointers to messages.
-func (c *Codec) marshalNonProtoField(v interface{}) ([]byte, error) {
+func (c *Codec) marshalNonProtoField(v any) ([]byte, error) {
 	if v == nil {
 		return []byte("null"), nil
 	}
@@ -168,7 +168,7 @@ func (c *Codec) marshalNonProtoField(v interface{}) ([]byte, error) {
 }
 
 // Unmarshal unmarshals JSON "data" into "v"
-func (c *Codec) Unmarshal(data []byte, v interface{}) error {
+func (c *Codec) Unmarshal(data []byte, v any) error {
 	return unmarshalJSONPb(data, c.UnmarshalOptions, v)
 }
 
@@ -190,13 +190,13 @@ type DecoderWrapper struct {
 
 // Decode wraps the embedded decoder's Decode method to support
 // protos using a jsonpb.Unmarshaler.
-func (d DecoderWrapper) Decode(v interface{}) error {
+func (d DecoderWrapper) Decode(v any) error {
 	return decodeJSONPb(d.Decoder, d.UnmarshalOptions, v)
 }
 
 // NewEncoder returns an Encoder which writes JSON stream into "w".
 func (c *Codec) NewEncoder(w io.Writer) codec.Encoder {
-	return codec.EncoderFunc(func(v interface{}) error {
+	return codec.EncoderFunc(func(v any) error {
 		if err := c.marshalTo(w, v); err != nil {
 			return err
 		}
@@ -207,12 +207,12 @@ func (c *Codec) NewEncoder(w io.Writer) codec.Encoder {
 	})
 }
 
-func unmarshalJSONPb(data []byte, unmarshaler protojson.UnmarshalOptions, v interface{}) error {
+func unmarshalJSONPb(data []byte, unmarshaler protojson.UnmarshalOptions, v any) error {
 	d := json.NewDecoder(bytes.NewReader(data))
 	return decodeJSONPb(d, unmarshaler, v)
 }
 
-func decodeJSONPb(d *json.Decoder, unmarshaler protojson.UnmarshalOptions, v interface{}) error {
+func decodeJSONPb(d *json.Decoder, unmarshaler protojson.UnmarshalOptions, v any) error {
 	p, ok := v.(proto.Message)
 	if !ok {
 		return decodeNonProtoField(d, unmarshaler, v)
@@ -228,7 +228,7 @@ func decodeJSONPb(d *json.Decoder, unmarshaler protojson.UnmarshalOptions, v int
 	return unmarshaler.Unmarshal([]byte(b), p)
 }
 
-func decodeNonProtoField(d *json.Decoder, unmarshaler protojson.UnmarshalOptions, v interface{}) error {
+func decodeNonProtoField(d *json.Decoder, unmarshaler protojson.UnmarshalOptions, v any) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
 		return fmt.Errorf("%T is not a pointer", v)
@@ -309,7 +309,7 @@ func decodeNonProtoField(d *json.Decoder, unmarshaler protojson.UnmarshalOptions
 		return nil
 	}
 	if _, ok := rv.Interface().(protoEnum); ok {
-		var repr interface{}
+		var repr any
 		if err := d.Decode(&repr); err != nil {
 			return err
 		}

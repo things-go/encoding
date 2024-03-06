@@ -151,62 +151,30 @@ func (r *Encoding) Delete(mime string) error {
 	if mime == MIMEWildcard ||
 		mime == MIMEQuery ||
 		mime == MIMEURI {
-		return fmt.Errorf("encoding: MIME(%s) can't delete, you can override", mime)
+		return fmt.Errorf("encoding: MIME(%s) can't delete, but you can override it.", mime)
 	}
 	delete(r.mimeMap, mime)
 	return nil
 }
 
-// InboundForRequest returns the inbound Content-Type and marshalers for this request.
-// It checks the registry on the Encoding for the MIME type set by the Content-Type header.
-// If it isn't set (or the request Content-Type is empty), checks for "*".
-// If there are multiple Content-Type headers set, choose the first one that it can
+// InboundForRequest returns the inbound `Content-Type` and marshalers for this request.
+// It checks the registry on the Encoding for the MIME type set by the `Content-Type` header.
+// If it isn't set (or the request `Content-Type` is empty), checks for "*".
+// If there are multiple `Content-Type` headers set, choose the first one that it can
 // exactly match in the registry.
 // Otherwise, it follows the above logic for "*" Marshaler.
 func (r *Encoding) InboundForRequest(req *http.Request) (string, codec.Marshaler) {
-	var err error
-	var marshaler codec.Marshaler
-	var contentType string
-
-	for _, contentTypeVal := range req.Header[contentTypeHeader] {
-		contentType, _, err = mime.ParseMediaType(contentTypeVal)
-		if err != nil {
-			continue
-		}
-		if m, ok := r.mimeMap[contentType]; ok {
-			marshaler = m
-			break
-		}
-	}
-	if marshaler == nil {
-		contentType = MIMEWildcard
-		marshaler = r.mimeMap[MIMEWildcard]
-	}
-	return contentType, marshaler
+	return r.marshalerFromHeaderContentType(req.Header[contentTypeHeader])
 }
 
-// OutboundForRequest returns the outbound marshalers for this request.
-// It checks the registry on the Encoding for the MIME type set by the Accept header.
-// If it isn't set (or the request Accept is empty), checks for "*".
-// If there are multiple Accept headers set, choose the first one that it can
+// OutboundForRequest returns the marshalers for this request.
+// It checks the registry on the Encoding for the MIME type set by the `Accept` header.
+// If it isn't set (or the request `Accept` is empty), checks for "*".
+// If there are multiple `Accept` headers set, choose the first one that it can
 // exactly match in the registry.
 // Otherwise, it follows the above logic for "*" Marshaler.
 func (r *Encoding) OutboundForRequest(req *http.Request) codec.Marshaler {
-	var marshaler codec.Marshaler
-
-	for _, acceptVal := range req.Header[acceptHeader] {
-		headerValues := parseAcceptHeader(acceptVal)
-		for _, value := range headerValues {
-			if m, ok := r.mimeMap[value]; ok {
-				marshaler = m
-				break
-			}
-		}
-	}
-	if marshaler == nil {
-		marshaler = r.mimeMap[MIMEWildcard]
-	}
-	return marshaler
+	return r.marshalerFromHeaderAccept(req.Header[acceptHeader])
 }
 
 // Bind checks the Method and Content-Type to select codec.Marshaler automatically,
@@ -276,6 +244,7 @@ func (r *Encoding) Render(w http.ResponseWriter, req *http.Request, v any) error
 }
 
 func parseAcceptHeader(header string) []string {
+	// TODO: cache header maps to avoid parse again?
 	values := strings.Split(header, ",")
 	for i := 0; i < len(values); i++ {
 		values[i] = strings.TrimSpace(values[i])
@@ -283,30 +252,14 @@ func parseAcceptHeader(header string) []string {
 	return values
 }
 
-// InboundForResponse returns the inbound Content-Type and marshalers for this response.
-// It checks the registry on the Encoding for the MIME type set by the Content-Type header.
-// If it isn't set (or the response Content-Type is empty), checks for "*".
-// If there are multiple Content-Type headers set, choose the first one that it can
+// InboundForResponse returns the inbound marshalers for this response.
+// It checks the registry on the Encoding for the MIME type set by the `Content-Type` header.
+// If it isn't set (or the response `Content-Type` is empty), checks for "*".
+// If there are multiple `Content-Type` headers set, choose the first one that it can
 // exactly match in the registry.
 // Otherwise, it follows the above logic for "*" Marshaler.
 func (r *Encoding) InboundForResponse(resp *http.Response) codec.Marshaler {
-	var err error
-	var marshaler codec.Marshaler
-	var contentType string
-
-	for _, contentTypeVal := range resp.Header[contentTypeHeader] {
-		contentType, _, err = mime.ParseMediaType(contentTypeVal)
-		if err != nil {
-			continue
-		}
-		if m, ok := r.mimeMap[contentType]; ok {
-			marshaler = m
-			break
-		}
-	}
-	if marshaler == nil {
-		marshaler = r.mimeMap[MIMEWildcard]
-	}
+	_, marshaler := r.marshalerFromHeaderContentType(resp.Header[contentTypeHeader])
 	return marshaler
 }
 
@@ -324,4 +277,56 @@ func (r *Encoding) EncodeQuery(v any) (url.Values, error) {
 // pathTemplate is a template of url path like http://helloworld.dev/{name}/sub/{sub.name},
 func (r *Encoding) EncodeURL(athTemplate string, msg any, needQuery bool) string {
 	return r.mimeUri.EncodeURL(athTemplate, msg, needQuery)
+}
+
+// marshalerFromHeaderContentType returns the `Content-Type` and marshalers from `Content-Type` header.
+// It checks the registry on the Encoding for the MIME type set by the `Content-Type` header.
+// If it isn't set (or the `Content-Type` is empty), checks for "*".
+// If there are multiple `Content-Type` headers set, choose the first one that it can
+// exactly match in the registry.
+// Otherwise, it follows the above logic for "*" Marshaler.
+func (r *Encoding) marshalerFromHeaderContentType(values []string) (string, codec.Marshaler) {
+	var err error
+	var marshaler codec.Marshaler
+	var contentType string
+
+	for _, contentTypeVal := range values {
+		contentType, _, err = mime.ParseMediaType(contentTypeVal)
+		if err != nil {
+			continue
+		}
+		if m, ok := r.mimeMap[contentType]; ok {
+			marshaler = m
+			break
+		}
+	}
+	if marshaler == nil {
+		contentType = MIMEWildcard
+		marshaler = r.mimeMap[MIMEWildcard]
+	}
+	return contentType, marshaler
+}
+
+// marshalerFromHeaderAccept returns the marshalers from `Accept` header.
+// It checks the registry on the Encoding for the MIME type set by the `Accept` header.
+// If it isn't set (or the `Accept` is empty), checks for "*".
+// If there are multiple `Accept` headers set, choose the first one that it can
+// exactly match in the registry.
+// Otherwise, it follows the above logic for "*" Marshaler.
+func (r *Encoding) marshalerFromHeaderAccept(values []string) codec.Marshaler {
+	var marshaler codec.Marshaler
+
+	for _, acceptVal := range values {
+		headerValues := parseAcceptHeader(acceptVal)
+		for _, value := range headerValues {
+			if m, ok := r.mimeMap[value]; ok {
+				marshaler = m
+				break
+			}
+		}
+	}
+	if marshaler == nil {
+		marshaler = r.mimeMap[MIMEWildcard]
+	}
+	return marshaler
 }

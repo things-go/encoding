@@ -11,13 +11,13 @@ import (
 type Codec struct{}
 
 // ContentType always Returns "application/xml; charset=utf-8".
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/xml; charset=utf-8"
 }
-func (*Codec) Marshal(v interface{}) ([]byte, error) {
+func (*Codec) Marshal(v any) ([]byte, error) {
 	return xml.Marshal(v)
 }
-func (*Codec) Unmarshal(data []byte, v interface{}) error {
+func (*Codec) Unmarshal(data []byte, v any) error {
 	return xml.Unmarshal(data, v)
 }
 func (*Codec) NewEncoder(w io.Writer) codec.Encoder {

@@ -12,13 +12,13 @@ import (
 type Codec struct{}
 
 // ContentType always Returns "application/x-yaml; charset=utf-8".
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/x-yaml; charset=utf-8"
 }
-func (*Codec) Marshal(v interface{}) ([]byte, error) {
+func (*Codec) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
-func (*Codec) Unmarshal(data []byte, v interface{}) error {
+func (*Codec) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
 }
 func (*Codec) NewEncoder(w io.Writer) codec.Encoder {

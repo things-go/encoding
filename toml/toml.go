@@ -12,13 +12,13 @@ import (
 type Codec struct{}
 
 // ContentType always Returns "application/yaml; charset=utf-8".
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/toml; charset=utf-8"
 }
-func (*Codec) Marshal(v interface{}) ([]byte, error) {
+func (*Codec) Marshal(v any) ([]byte, error) {
 	return toml.Marshal(v)
 }
-func (*Codec) Unmarshal(data []byte, v interface{}) error {
+func (*Codec) Unmarshal(data []byte, v any) error {
 	return toml.Unmarshal(data, v)
 }
 func (*Codec) NewDecoder(r io.Reader) codec.Decoder {

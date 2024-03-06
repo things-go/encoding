@@ -52,7 +52,7 @@ func (c *Codec) DisableUseEnumNumbers() *Codec {
 }
 
 // ContentType always Returns "application/x-www-form-urlencoded; charset=utf-8"
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/x-www-form-urlencoded; charset=utf-8"
 }
 func (c *Codec) Marshal(v any) ([]byte, error) {
@@ -70,7 +70,7 @@ func (c *Codec) Unmarshal(data []byte, v any) error {
 	return c.Decode(vs, v)
 }
 func (c *Codec) NewDecoder(r io.Reader) codec.Decoder {
-	return codec.DecoderFunc(func(value interface{}) error {
+	return codec.DecoderFunc(func(value any) error {
 		buffer, err := io.ReadAll(r)
 		if err != nil {
 			return err
@@ -79,7 +79,7 @@ func (c *Codec) NewDecoder(r io.Reader) codec.Decoder {
 	})
 }
 func (c *Codec) NewEncoder(w io.Writer) codec.Encoder {
-	return codec.EncoderFunc(func(value interface{}) error {
+	return codec.EncoderFunc(func(value any) error {
 		buffer, err := c.Marshal(value)
 		if err != nil {
 			return err
@@ -130,7 +130,7 @@ type MultipartCodec struct {
 	*Codec
 }
 
-func (*MultipartCodec) ContentType(_ interface{}) string {
+func (*MultipartCodec) ContentType(_ any) string {
 	return "multipart/form-data"
 }
 
@@ -138,7 +138,7 @@ type QueryCodec struct {
 	*Codec
 }
 
-func (*QueryCodec) ContentType(_ interface{}) string {
+func (*QueryCodec) ContentType(_ any) string {
 	return "__MIME__/Query"
 }
 
@@ -146,6 +146,6 @@ type UriCodec struct {
 	*Codec
 }
 
-func (*UriCodec) ContentType(_ interface{}) string {
+func (*UriCodec) ContentType(_ any) string {
 	return "__MIME__/URI"
 }

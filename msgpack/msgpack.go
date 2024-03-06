@@ -13,10 +13,10 @@ import (
 type Codec struct{}
 
 // ContentType always Returns "application/x-msgpack; charset=utf-8".
-func (*Codec) ContentType(_ interface{}) string {
+func (*Codec) ContentType(_ any) string {
 	return "application/x-msgpack; charset=utf-8"
 }
-func (c *Codec) Marshal(v interface{}) ([]byte, error) {
+func (c *Codec) Marshal(v any) ([]byte, error) {
 	b := &bytes.Buffer{}
 	err := c.NewEncoder(b).Encode(v)
 	if err != nil {
@@ -24,7 +24,7 @@ func (c *Codec) Marshal(v interface{}) ([]byte, error) {
 	}
 	return b.Bytes(), nil
 }
-func (c *Codec) Unmarshal(data []byte, v interface{}) error {
+func (c *Codec) Unmarshal(data []byte, v any) error {
 	return c.NewDecoder(bytes.NewReader(data)).Decode(v)
 }
 func (*Codec) NewDecoder(r io.Reader) codec.Decoder {

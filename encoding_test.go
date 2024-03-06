@@ -26,7 +26,7 @@ import (
 
 var marshalers = []dummyMarshaler{0, 1}
 
-func TestEncoding_Register(t *testing.T) {
+func Test_Encoding_Register(t *testing.T) {
 	t.Run("empty MIME type", func(t *testing.T) {
 		registry := New()
 
@@ -65,7 +65,7 @@ func TestEncoding_Register(t *testing.T) {
 	})
 }
 
-func TestEncoding_MarshalerForRequest_Wildcard(t *testing.T) {
+func Test_Encoding_Inbound_Or_OutBound_ForRequest_Wildcard(t *testing.T) {
 	var registry = New()
 
 	r, err := http.NewRequest("GET", "http://example.com", nil)
@@ -81,11 +81,11 @@ func TestEncoding_MarshalerForRequest_Wildcard(t *testing.T) {
 	}
 	out := registry.OutboundForRequest(r)
 	if _, ok := out.(*HTTPBodyCodec); !ok {
-		t.Errorf("out = %#v; want a HTTPBodyCodec", in)
+		t.Errorf("out = %#v; want a HTTPBodyCodec", out)
 	}
 }
 
-func TestEncoding_MarshalerForRequest_NotWildcard(t *testing.T) {
+func Test_Encoding_Inbound_Or_OutBound_ForRequest_NotWildcard(t *testing.T) {
 	var registry = New()
 
 	err := registry.Register("application/x-0", &marshalers[0])
@@ -147,12 +147,12 @@ func TestEncoding_MarshalerForRequest_NotWildcard(t *testing.T) {
 
 type dummyMarshaler int
 
-func (dummyMarshaler) ContentType(_ interface{}) string { return "" }
-func (dummyMarshaler) Marshal(interface{}) ([]byte, error) {
+func (dummyMarshaler) ContentType(_ any) string { return "" }
+func (dummyMarshaler) Marshal(any) ([]byte, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (dummyMarshaler) Unmarshal([]byte, interface{}) error {
+func (dummyMarshaler) Unmarshal([]byte, any) error {
 	return errors.New("not implemented")
 }
 
@@ -169,13 +169,13 @@ func (m dummyMarshaler) GoString() string {
 
 type dummyDecoder struct{}
 
-func (dummyDecoder) Decode(interface{}) error {
+func (dummyDecoder) Decode(any) error {
 	return errors.New("not implemented")
 }
 
 type dummyEncoder struct{}
 
-func (dummyEncoder) Encode(interface{}) error {
+func (dummyEncoder) Encode(any) error {
 	return errors.New("not implemented")
 }
 
@@ -209,7 +209,7 @@ var protoMessage = &examplepb.ABitOfEverything{
 	},
 }
 
-func TestEncoding_Bind(t *testing.T) {
+func Test_Encoding_Bind(t *testing.T) {
 	registry := New()
 	tests := []struct {
 		name    string
@@ -431,7 +431,7 @@ func TestEncoding_Bind(t *testing.T) {
 	}
 }
 
-func TestEncoding_BindQuery(t *testing.T) {
+func Test_Encoding_BindQuery(t *testing.T) {
 	registry := New()
 	require.NoError(t, registry.Register(MIMEQuery, form.New("json")))
 
@@ -494,7 +494,7 @@ func TestEncoding_BindQuery(t *testing.T) {
 	}
 }
 
-func TestEncoding_BindUri(t *testing.T) {
+func Test_Encoding_BindUri(t *testing.T) {
 	registry := New()
 	require.NoError(t, registry.Register(MIMEURI, form.New("json")))
 
@@ -594,12 +594,12 @@ func TestEncoding_BindUri(t *testing.T) {
 // helper
 func alloc(t reflect.Type) reflect.Value {
 	if t == nil {
-		return reflect.ValueOf(new(interface{}))
+		return reflect.ValueOf(new(any))
 	}
 	return reflect.New(t.Elem())
 }
 
-func TestEncoding_Render(t *testing.T) {
+func Test_Encoding_Render(t *testing.T) {
 	type args struct {
 		w      http.ResponseWriter
 		genReq func() (*http.Request, error)
@@ -664,7 +664,7 @@ func TestEncoding_Render(t *testing.T) {
 	}
 }
 
-func TestParseAcceptHeader(t *testing.T) {
+func Test_ParseAcceptHeader(t *testing.T) {
 	tests := []struct {
 		name   string
 		header string
@@ -685,6 +685,66 @@ func TestParseAcceptHeader(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := parseAcceptHeader(tt.header); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("parseAcceptHeader() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_Encoding_InBound_ForResponse_Wildcard(t *testing.T) {
+	var registry = New()
+
+	resp := &http.Response{
+		Header: make(http.Header),
+	}
+	resp.Header.Set("Content-Type", "application/unknown")
+
+	out := registry.InboundForResponse(resp)
+	if _, ok := out.(*HTTPBodyCodec); !ok {
+		t.Errorf("out = %#v; want a HTTPBodyCodec", out)
+	}
+}
+
+func Test_Encoding_Inbound_ForRequest_NotWildcard(t *testing.T) {
+	var registry = New()
+
+	err := registry.Register("application/x-0", &marshalers[0])
+	require.NoError(t, err)
+	err = registry.Register("application/x-1", &marshalers[1])
+	require.NoError(t, err)
+
+	tests := []struct {
+		name        string
+		contentType string
+		wantOut     codec.Marshaler
+	}{
+		// You can specify a marshaler for a specific MIME type.
+		// The output marshaler follows the input one unless specified.
+		{
+			name:        "",
+			contentType: "application/x-0",
+			wantOut:     &marshalers[0],
+		},
+		// You can also separately specify an output marshaler
+		{
+			name:        "",
+			contentType: "application/x-0",
+			wantOut:     &marshalers[0],
+		},
+		{
+			name:        "",
+			contentType: "application/x-1; charset=UTF-8",
+			wantOut:     &marshalers[1],
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			resp := &http.Response{
+				Header: make(http.Header),
+			}
+			resp.Header.Set("Content-Type", test.contentType)
+			out := registry.InboundForResponse(resp)
+			if got, want := out, test.wantOut; got != want {
+				t.Errorf("out = %#v; want %#v", got, want)
 			}
 		})
 	}

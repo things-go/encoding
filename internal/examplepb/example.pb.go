@@ -1423,7 +1423,7 @@ func file_examplepb_example_proto_rawDescGZIP() []byte {
 
 var file_examplepb_example_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_examplepb_example_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
-var file_examplepb_example_proto_goTypes = []interface{}{
+var file_examplepb_example_proto_goTypes = []any{
 	(NumericEnum)(0),                                   // 0: dyn.encoding.internal.examplepb.NumericEnum
 	(ABitOfEverything_Nested_DeepEnum)(0),              // 1: dyn.encoding.internal.examplepb.ABitOfEverything.Nested.DeepEnum
 	(RepeatedResponseBodyOut_Response_ResponseType)(0), // 2: dyn.encoding.internal.examplepb.RepeatedResponseBodyOut.Response.ResponseType
@@ -1490,7 +1490,7 @@ func file_examplepb_example_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_examplepb_example_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*SimpleMessage); i {
 			case 0:
 				return &v.state
@@ -1502,7 +1502,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*ABitOfEverything); i {
 			case 0:
 				return &v.state
@@ -1514,7 +1514,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[2].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseBodyOut); i {
 			case 0:
 				return &v.state
@@ -1526,7 +1526,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[3].Exporter = func(v any, i int) any {
 			switch v := v.(*RepeatedResponseBodyOut); i {
 			case 0:
 				return &v.state
@@ -1538,7 +1538,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[4].Exporter = func(v any, i int) any {
 			switch v := v.(*UpdateMessage); i {
 			case 0:
 				return &v.state
@@ -1550,7 +1550,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[5].Exporter = func(v any, i int) any {
 			switch v := v.(*NestedOuter); i {
 			case 0:
 				return &v.state
@@ -1562,7 +1562,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[6].Exporter = func(v any, i int) any {
 			switch v := v.(*NestedOne); i {
 			case 0:
 				return &v.state
@@ -1574,7 +1574,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[7].Exporter = func(v any, i int) any {
 			switch v := v.(*NestedTwo); i {
 			case 0:
 				return &v.state
@@ -1586,7 +1586,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[8].Exporter = func(v any, i int) any {
 			switch v := v.(*NestedThree); i {
 			case 0:
 				return &v.state
@@ -1598,7 +1598,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[9].Exporter = func(v any, i int) any {
 			switch v := v.(*UpdateNestedRequest); i {
 			case 0:
 				return &v.state
@@ -1610,7 +1610,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[10].Exporter = func(v any, i int) any {
 			switch v := v.(*ABitOfEverything_Nested); i {
 			case 0:
 				return &v.state
@@ -1622,7 +1622,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[14].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseBodyOut_Response); i {
 			case 0:
 				return &v.state
@@ -1634,7 +1634,7 @@ func file_examplepb_example_proto_init() {
 				return nil
 			}
 		}
-		file_examplepb_example_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+		file_examplepb_example_proto_msgTypes[15].Exporter = func(v any, i int) any {
 			switch v := v.(*RepeatedResponseBodyOut_Response); i {
 			case 0:
 				return &v.state
@@ -1647,7 +1647,7 @@ func file_examplepb_example_proto_init() {
 			}
 		}
 	}
-	file_examplepb_example_proto_msgTypes[1].OneofWrappers = []interface{}{
+	file_examplepb_example_proto_msgTypes[1].OneofWrappers = []any{
 		(*ABitOfEverything_OneofEmpty)(nil),
 		(*ABitOfEverything_OneofString)(nil),
 	}
