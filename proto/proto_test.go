@@ -10,6 +10,10 @@ import (
 	"github.com/things-go/encoding/testdata/examplepb"
 )
 
+type testInvalidProtoMessage struct {
+	Id int64
+}
+
 var message = &examplepb.ABitOfEverything{
 	SingleNested:        &examplepb.ABitOfEverything_Nested{},
 	RepeatedStringValue: nil,
@@ -52,14 +56,12 @@ func TestCodec_MarshalUnmarshal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshalling returned error: %s", err.Error())
 	}
-
 	// Unmarshal
 	unmarshalled := &examplepb.ABitOfEverything{}
 	err = m.Unmarshal(buffer, unmarshalled)
 	if err != nil {
 		t.Fatalf("Unmarshalling returned error: %s", err.Error())
 	}
-
 	if !proto.Equal(unmarshalled, message) {
 		t.Errorf(
 			"Unmarshalled didn't match original message: (original = %v) != (unmarshalled = %v)",
@@ -67,9 +69,22 @@ func TestCodec_MarshalUnmarshal(t *testing.T) {
 			message,
 		)
 	}
+
+	// invalid proto message
+	// Marshal
+	_, err = m.Marshal(&testInvalidProtoMessage{Id: 11})
+	if err == nil {
+		t.Fatalf("Marshal should returned an error")
+	}
+	// Unmarshal
+	unmarshalled1 := &testInvalidProtoMessage{}
+	err = m.Unmarshal(buffer, unmarshalled1)
+	if err == nil {
+		t.Fatalf("Unmarshal should returned an error")
+	}
 }
 
-func TestCodec_EncoderDecodert(t *testing.T) {
+func TestCodec_EncoderDecoder(t *testing.T) {
 	m := Codec{}
 
 	var buf bytes.Buffer
@@ -82,19 +97,30 @@ func TestCodec_EncoderDecodert(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Encoding returned error: %s", err.Error())
 	}
-
 	// Decode
 	unencoded := &examplepb.ABitOfEverything{}
 	err = decoder.Decode(unencoded)
 	if err != nil {
 		t.Fatalf("Unmarshalling returned error: %s", err.Error())
 	}
-
 	if !proto.Equal(unencoded, message) {
 		t.Errorf(
 			"Unencoded didn't match original message: (original = %v) != (unencoded = %v)",
 			unencoded,
 			message,
 		)
+	}
+
+	// invalid proto message
+	// Encode
+	err = encoder.Encode(&testInvalidProtoMessage{Id: 11})
+	if err == nil {
+		t.Fatalf("Encode should returned an error")
+	}
+	// Decode
+	unmarshalled1 := &testInvalidProtoMessage{}
+	err = decoder.Decode(unmarshalled1)
+	if err == nil {
+		t.Fatalf("Decode should returned an error")
 	}
 }

@@ -1,6 +1,7 @@
 package xml
 
 import (
+	"bytes"
 	"reflect"
 	"strings"
 	"testing"
@@ -51,13 +52,25 @@ func TestCodec_Marshal(t *testing.T) {
 	for _, tt := range tests {
 		data, err := codec.Marshal(tt.Value)
 		if err != nil {
-			t.Errorf("marshal(%#v): %s", tt.Value, err)
+			t.Errorf("Marshal(%#v): %s", tt.Value, err)
 		}
 		if got, want := string(data), tt.ExpectXML; got != want {
 			if strings.Contains(want, "\n") {
 				t.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s", tt.Value, got, want)
 			} else {
 				t.Errorf("marshal(%#v):\nhave %#q\nwant %#q", tt.Value, got, want)
+			}
+		}
+		data1 := &bytes.Buffer{}
+		err = codec.NewEncoder(data1).Encode(tt.Value)
+		if err != nil {
+			t.Errorf("Encode(%#v): %s", tt.Value, err)
+		}
+		if got, want := data1.String(), tt.ExpectXML; got != want {
+			if strings.Contains(want, "\n") {
+				t.Errorf("Encode(%#v):\nHAVE:\n%s\nWANT:\n%s", tt.Value, got, want)
+			} else {
+				t.Errorf("Encode(%#v):\nhave %#q\nwant %#q", tt.Value, got, want)
 			}
 		}
 	}
@@ -92,6 +105,15 @@ func TestCodec_Unmarshal(t *testing.T) {
 		}
 		if got, want := dest, tt.want; !reflect.DeepEqual(got, want) {
 			t.Errorf("unmarshal(%q):\nhave %#v\nwant %#v", tt.InputXML, got, want)
+		}
+
+		dest1 := reflect.New(vt.Elem()).Interface()
+		err = codec.NewDecoder(bytes.NewBuffer(data)).Decode(dest1)
+		if err != nil {
+			t.Errorf("Decode(%#v, %#v): %s", tt.InputXML, dest, err)
+		}
+		if got, want := dest1, tt.want; !reflect.DeepEqual(got, want) {
+			t.Errorf("Decode(%q):\nhave %#v\nwant %#v", tt.InputXML, got, want)
 		}
 	}
 }

@@ -63,6 +63,7 @@ func TestCodec_MarshalField(t *testing.T) {
 
 func TestCodec_MarshalFieldKnownErrors(t *testing.T) {
 	var m Codec
+
 	for _, fixt := range builtinKnownErrors {
 		buf, err := m.Marshal(fixt.data)
 		if err != nil {
@@ -166,14 +167,15 @@ func TestCodec_EncoderFields(t *testing.T) {
 }
 
 func TestCodec_Decoder(t *testing.T) {
-	var (
-		m Codec
+	m := Codec{
+		UseNumber:             true,
+		DisallowUnknownFields: true,
+	}
 
-		data = `{"id": "foo"}`
-		want = &examplepb.SimpleMessage{
-			Id: "foo",
-		}
-	)
+	var data = `{"id": "foo"}`
+	var want = &examplepb.SimpleMessage{
+		Id: "foo",
+	}
 
 	got := new(examplepb.SimpleMessage)
 	r := strings.NewReader(data)
@@ -181,8 +183,15 @@ func TestCodec_Decoder(t *testing.T) {
 	if err := dec.Decode(got); err != nil {
 		t.Errorf("m.Unmarshal(got) failed with %v; want success", err)
 	}
-
 	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
+		t.Errorf("got = %v; want = %v", got, want)
+	}
+}
+
+func TestCodec_Delimiter(t *testing.T) {
+	var m Codec
+
+	if got, want := m.Delimiter(), []byte("\n"); !reflect.DeepEqual(got, want) {
 		t.Errorf("got = %v; want = %v", got, want)
 	}
 }

@@ -1,6 +1,7 @@
 package form
 
 import (
+	"bytes"
 	"net/url"
 	"reflect"
 	"testing"
@@ -131,6 +132,11 @@ func TestEncode(t *testing.T) {
 			got, err := codec.Encode(tt.args)
 			assert.NoError(t, err)
 			assert.Equalf(t, tt.want, got, "Encode(%v)", tt.args)
+
+			// got1 := &bytes.Buffer{}
+			// err = codec.NewEncoder(got1).Encode(tt.args)
+			// assert.NoError(t, err)
+			// assert.Equalf(t, tt.want, got1.String(), "Encode(%v)", tt.args)
 		})
 	}
 }
@@ -164,6 +170,80 @@ func TestDecode(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := codec.Decode(tt.args.vars, tt.args.target); (err != nil) != tt.wantErr {
+				t.Errorf("Decode() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !tt.wantErr && !reflect.DeepEqual(tt.args.target, tt.want) {
+				t.Errorf("Decode() target = %v, want %v", tt.args.target, tt.want)
+			}
+		})
+	}
+}
+
+func Test_NewEncoder_Encode(t *testing.T) {
+	codec := New("json")
+	tests := []struct {
+		name string
+		args any
+		want string
+	}{
+		{
+			name: "full",
+			args: TestNotProto{
+				Name:  "test",
+				URL:   "https://go.dev",
+				Empty: "empty",
+			},
+			want: "empty=empty&name=test&url=https%3A%2F%2Fgo.dev",
+		},
+		{
+			name: "omitempty empty values",
+			args: TestNotProto{
+				Name: "test",
+				URL:  "https://go.dev",
+			},
+			want: "name=test&url=https%3A%2F%2Fgo.dev",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := &bytes.Buffer{}
+			err := codec.NewEncoder(got).Encode(tt.args)
+			assert.NoError(t, err)
+			assert.Equalf(t, tt.want, got.String(), "Encode(%v)", tt.args)
+		})
+	}
+}
+
+func Test_NewDecoder_Decode(t *testing.T) {
+	type TestDecode struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	}
+	codec := New("json")
+	p1 := TestDecode{}
+	type args struct {
+		vars   string
+		target any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		want    any
+	}{
+		{
+			name: "test",
+			args: args{
+				vars:   "name=golang&url=https%3A%2F%2Fgo.dev",
+				target: &p1,
+			},
+			wantErr: false,
+			want:    &TestDecode{"golang", "https://go.dev"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := codec.NewDecoder(bytes.NewBuffer([]byte(tt.args.vars))).Decode(tt.args.target); (err != nil) != tt.wantErr {
 				t.Errorf("Decode() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !tt.wantErr && !reflect.DeepEqual(tt.args.target, tt.want) {
