@@ -9,7 +9,7 @@ require (
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.9.0
 	github.com/ugorji/go/codec v1.2.12
-	google.golang.org/genproto/googleapis/api v0.0.0-20230717213848-3f92550aa753
+	google.golang.org/genproto/googleapis/api v0.0.0-20240311173647-c811ad7063a7
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
