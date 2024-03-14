@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/things-go/encoding/testdata/examplepb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 type NoProtoSub struct {
@@ -99,6 +100,18 @@ func TestEncodeURL(t *testing.T) {
 			`http://hello.dev/go/sub?sub.naming=golang`,
 		},
 		{
+			name: "proto: param with filed mask",
+			args: args{
+				pathTemplate: "http://hello.dev/{sub.naming}",
+				msg: &examplepb.HelloRequest{
+					Sub:        &examplepb.Sub{Name: "golang"},
+					UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"name1", "name2"}},
+				},
+				needQuery: false,
+			},
+			want: "http://hello.dev/golang?updateMask=name1,name2",
+		},
+		{
 			"no proto: no any param",
 			args{
 				"http://hello.dev/sub",
@@ -123,7 +136,7 @@ func TestEncodeURL(t *testing.T) {
 			`http://hello.dev/test/sub/2233!!!`,
 		},
 		{
-			"proto: param with repeated",
+			"no proto: param with repeated",
 			args{
 				"http://hello.dev/{name}/sub",
 				&NoProtoHello{

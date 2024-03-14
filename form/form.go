@@ -23,7 +23,9 @@ type Codec struct {
 }
 
 // New returns a new Codec,
-// default tag name is "json", and proto message use proto field.
+//
+//	UseProtoNames: true
+//	UseEnumNumbers: true
 func New(tagName string) *Codec {
 	encoder := form.NewEncoder()
 	encoder.SetTagName(tagName)

@@ -54,20 +54,29 @@ func (c *Codec) EncodeURL(pathTemplate string, v any, needQuery bool) string {
 		}
 	}
 	path := reg.ReplaceAllStringFunc(pathTemplate, repl)
-
 	if needQuery {
-		values, err := c.Encode(v)
-		if err == nil && len(values) > 0 {
+		queryParams, err := c.Encode(v)
+		if err == nil && len(queryParams) > 0 {
 			for key := range pathParams {
-				delete(values, key)
+				delete(queryParams, key)
 			}
-			query := values.Encode()
-			if query != "" {
+			if query := queryParams.Encode(); query != "" {
+				path += "?" + query
+			}
+		}
+	} else {
+		if vv, ok := v.(proto.Message); ok {
+			if query := c.EncodeFieldMask(vv.ProtoReflect()); query != "" {
 				path += "?" + query
 			}
 		}
 	}
 	return path
+}
+
+// EncodeFieldMask return field mask name=paths
+func (c *Codec) EncodeFieldMask(m protoreflect.Message) string {
+	return EncodeFieldMask(m, c.UseProtoNames)
 }
 
 func getValueFromProtoWithField(v protoreflect.Message, fieldPath []string) (string, error) {

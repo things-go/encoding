@@ -19,6 +19,7 @@ message test_model {
 // The request message containing the user's name.
 message HelloRequest {
   string name = 1;
+  google.protobuf.FieldMask update_mask = 3;
   Sub sub = 2;
 }
 
