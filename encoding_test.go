@@ -494,6 +494,7 @@ func Test_Encoding_BindQuery(t *testing.T) {
 	}
 }
 
+// Deprecated: Because BindUri is deprecated.
 func Test_Encoding_BindUri(t *testing.T) {
 	registry := New()
 	require.NoError(t, registry.Register(MIMEURI, form.New("json")))
@@ -578,7 +579,69 @@ func Test_Encoding_BindUri(t *testing.T) {
 			}
 			got := alloc(reflect.TypeOf(tt.want))
 			if err = registry.BindUri(req, got.Interface()); (err != nil) != tt.wantErr {
-				t.Errorf("BindQuery() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("BindUri() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if _, ok := tt.want.(proto.Message); ok {
+				if diff := proto.Equal(got.Interface().(proto.Message), tt.want.(proto.Message)); !diff {
+					t.Errorf("got = %v, want %v", got, tt.want)
+				}
+			} else {
+				require.Equal(t, got.Interface(), tt.want)
+			}
+		})
+	}
+}
+
+func Test_Encoding_BindURI(t *testing.T) {
+	registry := New()
+	require.NoError(t, registry.Register(MIMEURI, form.New("json")))
+
+	tests := []struct {
+		name    string
+		genUri  func() (url.Values, error)
+		want    any
+		wantErr bool
+	}{
+		{
+			"uri - no proto",
+			func() (url.Values, error) {
+				param := url.Values{}
+				param.Add("id", "foo")
+				param.Add("name", "bar")
+				return param, nil
+			},
+			&TestMode{
+				Id:   "foo",
+				Name: "bar",
+			},
+			false,
+		},
+		{
+			"uri - proto",
+			func() (url.Values, error) {
+				param := url.Values{}
+				param.Add("id", "11")
+				param.Add("uint32", "1234")
+				param.Add("bool", "true")
+				return param, nil
+			},
+			&examplepb.Complex{
+				Id:     11,
+				Uint32: wrapperspb.UInt32(1234),
+				Bool:   wrapperspb.Bool(true),
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			raws, err := tt.genUri()
+			if err != nil {
+				t.Errorf("genUri() error = %v", err)
+			}
+			got := alloc(reflect.TypeOf(tt.want))
+			if err = registry.BindURI(raws, got.Interface()); (err != nil) != tt.wantErr {
+				t.Errorf("BindURI() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if _, ok := tt.want.(proto.Message); ok {
 				if diff := proto.Equal(got.Interface().(proto.Message), tt.want.(proto.Message)); !diff {

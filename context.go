@@ -13,6 +13,8 @@ type ctxUriKey struct{}
 // URL variables can be set by making a route that captures
 // the required variables, starting a server and sending the request
 // to that server.
+//
+// Deprecated: Because BindUri is deprecated.
 func RequestWithUri(req *http.Request, uri url.Values) *http.Request {
 	if uri == nil {
 		uri = url.Values{}
@@ -22,6 +24,8 @@ func RequestWithUri(req *http.Request, uri url.Values) *http.Request {
 }
 
 // FromRequestUri returns the route variables for the current request, if any.
+//
+// Deprecated: Because BindUri is deprecated.
 func FromRequestUri(req *http.Request) url.Values {
 	if rv := req.Context().Value(ctxUriKey{}); rv != nil {
 		return rv.(url.Values)
