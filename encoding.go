@@ -24,12 +24,11 @@ const defaultMemory = 32 << 20
 
 // Content-Type MIME of the most common data formats.
 const (
-	// MIMEURI is sepcial form query.
+	// MIMEURI is special form query.
 	MIMEQuery = "__MIME__/QUERY"
-	// MIMEURI is sepcial form uri.
+	// MIMEURI is special form uri.
 	MIMEURI = "__MIME__/URI"
-
-	// MIMEWildcard is the fallback MIME type used for requests which do not match
+	// MIMEWildcard is the fallback special MIME type used for requests which do not match
 	// a registered MIME type.
 	MIMEWildcard = "*"
 
@@ -54,26 +53,16 @@ var (
 
 // Encoding is a mapping from MIME types to Marshalers.
 type Encoding struct {
-	mimeMap   map[string]codec.Marshaler
-	mimeQuery codec.FormMarshaler
-	mimeUri   codec.UriMarshaler
+	mimeMap      map[string]codec.Marshaler
+	mimeQuery    codec.FormMarshaler
+	mimeUri      codec.UriMarshaler
+	mimeWildcard codec.Marshaler
 }
 
 // New encoding with default Marshalers
 func New() *Encoding {
 	return &Encoding{
 		mimeMap: map[string]codec.Marshaler{
-			MIMEWildcard: &HTTPBodyCodec{
-				Marshaler: &jsonpb.Codec{
-					MarshalOptions: protojson.MarshalOptions{
-						UseProtoNames:  true,
-						UseEnumNumbers: true,
-					},
-					UnmarshalOptions: protojson.UnmarshalOptions{
-						DiscardUnknown: true,
-					},
-				},
-			},
 			MIMEPOSTForm:          form.New("json"),
 			MIMEMultipartPOSTForm: &form.MultipartCodec{Codec: form.New("json")},
 			MIMEJSON: &jsonpb.Codec{
@@ -95,6 +84,17 @@ func New() *Encoding {
 		},
 		mimeQuery: &form.QueryCodec{Codec: form.New("json")},
 		mimeUri:   &form.UriCodec{Codec: form.New("json")},
+		mimeWildcard: &HTTPBodyCodec{
+			Marshaler: &jsonpb.Codec{
+				MarshalOptions: protojson.MarshalOptions{
+					UseProtoNames:  true,
+					UseEnumNumbers: true,
+				},
+				UnmarshalOptions: protojson.UnmarshalOptions{
+					DiscardUnknown: true,
+				},
+			},
+		},
 	}
 }
 
@@ -121,6 +121,8 @@ func (r *Encoding) Register(mime string, marshaler codec.Marshaler) error {
 			return errors.New("encoding: marshaller should be implement codec.UriMarshaler")
 		}
 		r.mimeUri = m
+	case MIMEWildcard:
+		r.mimeWildcard = marshaler
 	default:
 		r.mimeMap[mime] = marshaler
 	}
@@ -136,17 +138,19 @@ func (r *Encoding) Get(mime string) codec.Marshaler {
 		return r.mimeQuery
 	case MIMEURI:
 		return r.mimeUri
+	case MIMEWildcard:
+		return r.mimeWildcard
 	default:
 		m := r.mimeMap[mime]
 		if m == nil {
-			m = r.mimeMap[MIMEWildcard]
+			m = r.mimeWildcard
 		}
 		return m
 	}
 }
 
 // Delete remove the MIME type marshaler.
-// MIMEWildcard, MIMEQuery, MIMEURI should be always exist.
+// MIMEWildcard, MIMEQuery, MIMEURI should be always exist and valid.
 func (r *Encoding) Delete(mime string) error {
 	if mime == MIMEWildcard ||
 		mime == MIMEQuery ||
@@ -259,7 +263,7 @@ func parseAcceptHeader(header string) []string {
 	return values
 }
 
-// InboundForResponse returns the inbound marshalers for this response.
+// InboundForResponse returns the inbound marshaler for this response.
 // It checks the registry on the Encoding for the MIME type set by the `Content-Type` header.
 // If it isn't set (or the response `Content-Type` is empty), checks for "*".
 // If there are multiple `Content-Type` headers set, choose the first one that it can
@@ -286,7 +290,7 @@ func (r *Encoding) EncodeURL(athTemplate string, msg any, needQuery bool) string
 	return r.mimeUri.EncodeURL(athTemplate, msg, needQuery)
 }
 
-// marshalerFromHeaderContentType returns the `Content-Type` and marshalers from `Content-Type` header.
+// marshalerFromHeaderContentType returns the `Content-Type` and marshaler from `Content-Type` header.
 // It checks the registry on the Encoding for the MIME type set by the `Content-Type` header.
 // If it isn't set (or the `Content-Type` is empty), checks for "*".
 // If there are multiple `Content-Type` headers set, choose the first one that it can
@@ -309,7 +313,7 @@ func (r *Encoding) marshalerFromHeaderContentType(values []string) (string, code
 	}
 	if marshaler == nil {
 		contentType = MIMEWildcard
-		marshaler = r.mimeMap[MIMEWildcard]
+		marshaler = r.mimeWildcard
 	}
 	return contentType, marshaler
 }
@@ -333,7 +337,7 @@ func (r *Encoding) marshalerFromHeaderAccept(values []string) codec.Marshaler {
 		}
 	}
 	if marshaler == nil {
-		marshaler = r.mimeMap[MIMEWildcard]
+		marshaler = r.mimeWildcard
 	}
 	return marshaler
 }
