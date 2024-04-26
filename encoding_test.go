@@ -22,6 +22,9 @@ import (
 	"github.com/things-go/encoding/json"
 	"github.com/things-go/encoding/msgpack"
 	"github.com/things-go/encoding/testdata/examplepb"
+	"github.com/things-go/encoding/toml"
+	"github.com/things-go/encoding/xml"
+	"github.com/things-go/encoding/yaml"
 )
 
 var marshalers = []dummyMarshaler{0, 1}
@@ -211,6 +214,12 @@ var protoMessage = &examplepb.ABitOfEverything{
 
 func Test_Encoding_Bind(t *testing.T) {
 	registry := New()
+	_ = registry.Register(MIMEXML, &xml.Codec{})
+	_ = registry.Register(MIMEXML2, &xml.Codec{})
+	_ = registry.Register(MIMEMSGPACK, &msgpack.Codec{})
+	_ = registry.Register(MIMEMSGPACK2, &msgpack.Codec{})
+	_ = registry.Register(MIMEYAML, &yaml.Codec{})
+	_ = registry.Register(MIMETOML, &toml.Codec{})
 	tests := []struct {
 		name    string
 		genReq  func() (*http.Request, error)

@@ -13,11 +13,7 @@ import (
 	"github.com/things-go/encoding/codec"
 	"github.com/things-go/encoding/form"
 	"github.com/things-go/encoding/jsonpb"
-	"github.com/things-go/encoding/msgpack"
 	"github.com/things-go/encoding/proto"
-	"github.com/things-go/encoding/toml"
-	"github.com/things-go/encoding/xml"
-	"github.com/things-go/encoding/yaml"
 )
 
 const defaultMemory = 32 << 20
@@ -60,6 +56,24 @@ type Encoding struct {
 }
 
 // New encoding with default Marshalers
+// Default:
+//
+//	MIMEPOSTForm: form.Codec
+//	MIMEMultipartPOSTForm: form.MultipartCodec
+//	MIMEJSON: jsonpb.Codec
+//	MIMEPROTOBUF: proto.Codec
+//	mimeQuery: form.QueryCodec
+//	mimeUri:   form.UriCodec
+//	mimeWildcard: HTTPBodyCodec
+//
+// you can manually register your custom Marshaler.
+//
+//	MIMEXML:      xml.Codec
+//	MIMEXML2:     xml.Codec
+//	MIMEMSGPACK:  msgpack.Codec
+//	MIMEMSGPACK2: msgpack.Codec
+//	MIMEYAML:     yaml.Codec
+//	SMIMETOML:    toml.Codec
 func New() *Encoding {
 	return &Encoding{
 		mimeMap: map[string]codec.Marshaler{
@@ -74,13 +88,7 @@ func New() *Encoding {
 					DiscardUnknown: true,
 				},
 			},
-			MIMEXML:      &xml.Codec{},
-			MIMEXML2:     &xml.Codec{},
 			MIMEPROTOBUF: &proto.Codec{},
-			MIMEMSGPACK:  &msgpack.Codec{},
-			MIMEMSGPACK2: &msgpack.Codec{},
-			MIMEYAML:     &yaml.Codec{},
-			MIMETOML:     &toml.Codec{},
 		},
 		mimeQuery: &form.QueryCodec{Codec: form.New("json")},
 		mimeUri:   &form.UriCodec{Codec: form.New("json")},
