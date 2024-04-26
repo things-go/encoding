@@ -494,105 +494,7 @@ func Test_Encoding_BindQuery(t *testing.T) {
 	}
 }
 
-// Deprecated: Because BindUri is deprecated.
 func Test_Encoding_BindUri(t *testing.T) {
-	registry := New()
-	require.NoError(t, registry.Register(MIMEURI, form.New("json")))
-
-	tests := []struct {
-		name    string
-		genReq  func() (*http.Request, error)
-		want    any
-		wantErr bool
-	}{
-		{
-			"uri - no proto",
-			func() (*http.Request, error) {
-				r, err := http.NewRequest(http.MethodGet, "http://example.com/foo/bar", nil)
-				if err != nil {
-					return nil, err
-				}
-
-				param := url.Values{}
-				param.Add("id", "foo")
-				param.Add("name", "bar")
-				return RequestWithUri(r, param), nil
-			},
-			&TestMode{
-				Id:   "foo",
-				Name: "bar",
-			},
-			false,
-		},
-		{
-			"uri - proto",
-			func() (*http.Request, error) {
-				r, err := http.NewRequest(http.MethodGet, "http://example.com?id=11&uint32=1234&bool=true", nil)
-				if err != nil {
-					return nil, err
-				}
-				param := url.Values{}
-				param.Add("id", "11")
-				param.Add("uint32", "1234")
-				param.Add("bool", "true")
-				return RequestWithUri(r, param), nil
-			},
-			&examplepb.Complex{
-				Id:     11,
-				Uint32: wrapperspb.UInt32(1234),
-				Bool:   wrapperspb.Bool(true),
-			},
-			false,
-		},
-		{
-			"uri - always in context",
-			func() (*http.Request, error) {
-				r, err := http.NewRequest(http.MethodGet, "http://example.com?id=11&uint32=1234&bool=true", nil)
-				if err != nil {
-					return nil, err
-				}
-				r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-				return RequestWithUri(r, nil), nil
-			},
-			&examplepb.Complex{},
-			false,
-		},
-		{
-			"uri - no existing in context",
-			func() (*http.Request, error) {
-				r, err := http.NewRequest(http.MethodGet, "http://example.com?id=11&uint32=1234&bool=true", nil)
-				if err != nil {
-					return nil, err
-				}
-				r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-				return r, nil
-			},
-			&examplepb.Complex{},
-			true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req, err := tt.genReq()
-			if err != nil {
-				t.Errorf("genReq() error = %v", err)
-			}
-			got := alloc(reflect.TypeOf(tt.want))
-			if err = registry.BindUri(req, got.Interface()); (err != nil) != tt.wantErr {
-				t.Errorf("BindUri() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if _, ok := tt.want.(proto.Message); ok {
-				if diff := proto.Equal(got.Interface().(proto.Message), tt.want.(proto.Message)); !diff {
-					t.Errorf("got = %v, want %v", got, tt.want)
-				}
-			} else {
-				require.Equal(t, got.Interface(), tt.want)
-			}
-		})
-	}
-}
-
-func Test_Encoding_BindURI(t *testing.T) {
 	registry := New()
 	require.NoError(t, registry.Register(MIMEURI, form.New("json")))
 
@@ -640,7 +542,7 @@ func Test_Encoding_BindURI(t *testing.T) {
 				t.Errorf("genUri() error = %v", err)
 			}
 			got := alloc(reflect.TypeOf(tt.want))
-			if err = registry.BindURI(raws, got.Interface()); (err != nil) != tt.wantErr {
+			if err = registry.BindUri(raws, got.Interface()); (err != nil) != tt.wantErr {
 				t.Errorf("BindURI() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if _, ok := tt.want.(proto.Message); ok {

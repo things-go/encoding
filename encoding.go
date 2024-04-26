@@ -214,19 +214,7 @@ func (r *Encoding) BindQuery(req *http.Request, v any) error {
 }
 
 // BindUri binds the passed struct pointer using the uri codec.Marshaler.
-// NOTE: before use this, you should set uri params in the request context with RequestWithUri.
-//
-// Deprecated: Use BindURI instead.
-func (r *Encoding) BindUri(req *http.Request, v any) error {
-	raws := FromRequestUri(req)
-	if raws == nil {
-		return errors.New("encoding: must be request with uri in context")
-	}
-	return r.mimeUri.Decode(raws, v)
-}
-
-// BindUri binds the passed struct pointer using the uri codec.Marshaler.
-func (r *Encoding) BindURI(raws url.Values, v any) error {
+func (r *Encoding) BindUri(raws url.Values, v any) error {
 	return r.mimeUri.Decode(raws, v)
 }
 
