@@ -21,6 +21,7 @@ import (
 	"github.com/things-go/encoding/form"
 	"github.com/things-go/encoding/json"
 	"github.com/things-go/encoding/msgpack"
+	pro "github.com/things-go/encoding/proto"
 	"github.com/things-go/encoding/testdata/examplepb"
 	"github.com/things-go/encoding/toml"
 	"github.com/things-go/encoding/xml"
@@ -45,14 +46,14 @@ func Test_Encoding_Register(t *testing.T) {
 	t.Run("remove MIME type", func(t *testing.T) {
 		registry := New()
 
-		got := registry.Get(MIMEMSGPACK2)
-		_, ok := got.(*msgpack.Codec)
-		require.True(t, ok, "should be got MIME wildcard marshaler")
+		got := registry.Get(MIMEPROTOBUF)
+		_, ok := got.(*pro.Codec)
+		require.True(t, ok, "should be got MIME proto marshaler")
 
-		err := registry.Delete(MIMEMSGPACK2)
+		err := registry.Delete(MIMEPROTOBUF)
 		require.NoError(t, err)
 
-		got = registry.Get(MIMEMSGPACK2)
+		got = registry.Get(MIMEPROTOBUF)
 		_, ok = got.(*HTTPBodyCodec)
 		require.True(t, ok, "should be got MIME wildcard marshaler")
 	})
