@@ -106,7 +106,7 @@ func (r *Encoding) Register(mime string, marshaler codec.Marshaler) error {
 		return errors.New("encoding: empty MIME type")
 	}
 	if marshaler == nil {
-		return errors.New("encoding: marshaller should be not")
+		return errors.New("encoding: marshaller should be not nil")
 	}
 	switch mime {
 	case MIMEQuery:
