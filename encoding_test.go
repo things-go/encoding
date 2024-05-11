@@ -45,12 +45,14 @@ func Test_Encoding_Register(t *testing.T) {
 	})
 	t.Run("remove MIME type", func(t *testing.T) {
 		registry := New()
+		err := registry.Register(MIMEPROTOBUF, &pro.Codec{})
+		require.NoError(t, err)
 
 		got := registry.Get(MIMEPROTOBUF)
 		_, ok := got.(*pro.Codec)
 		require.True(t, ok, "should be got MIME proto marshaler")
 
-		err := registry.Delete(MIMEPROTOBUF)
+		err = registry.Delete(MIMEPROTOBUF)
 		require.NoError(t, err)
 
 		got = registry.Get(MIMEPROTOBUF)
@@ -215,6 +217,7 @@ var protoMessage = &examplepb.ABitOfEverything{
 
 func Test_Encoding_Bind(t *testing.T) {
 	registry := New()
+	_ = registry.Register(MIMEPROTOBUF, &pro.Codec{})
 	_ = registry.Register(MIMEXML, &xml.Codec{})
 	_ = registry.Register(MIMEXML2, &xml.Codec{})
 	_ = registry.Register(MIMEMSGPACK, &msgpack.Codec{})

@@ -1,4 +1,4 @@
-package encoding
+package httpbody
 
 import (
 	"google.golang.org/genproto/googleapis/api/httpbody"
