@@ -2,7 +2,6 @@
 
 http encoding toolkit  
 
-[![GoDoc](https://godoc.org/github.com/things-go/encoding?status.svg)](https://godoc.org/github.com/things-go/encoding)
 [![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/things-go/encoding?tab=doc)
 [![codecov](https://codecov.io/gh/things-go/encoding/branch/main/graph/badge.svg)](https://codecov.io/gh/things-go/encoding)
 [![Tests](https://github.com/things-go/encoding/actions/workflows/ci.yml/badge.svg)](https://github.com/things-go/encoding/actions/workflows/ci.yml)
@@ -17,11 +16,13 @@ http encoding toolkit
 ### Installation
 
 Use go get.
+
 ```bash
     go get github.com/things-go/encoding
 ```
 
 Then import the package into your own code.
+
 ```bash
     import "github.com/things-go/encoding"
 ```
