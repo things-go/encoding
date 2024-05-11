@@ -54,7 +54,7 @@ func Test_Encoding_Register(t *testing.T) {
 		require.NoError(t, err)
 
 		got = registry.Get(MIMEPROTOBUF)
-		_, ok = got.(*HTTPBodyCodec)
+		_, ok = got.(*json.Codec)
 		require.True(t, ok, "should be got MIME wildcard marshaler")
 	})
 	t.Run("remove not allow MIME type", func(t *testing.T) {
@@ -80,12 +80,12 @@ func Test_Encoding_Inbound_Or_OutBound_ForRequest_Wildcard(t *testing.T) {
 	r.Header.Set("Accept", "application/unknown")
 	r.Header.Set("Content-Type", "application/unknown")
 	_, in := registry.InboundForRequest(r)
-	if _, ok := in.(*HTTPBodyCodec); !ok {
-		t.Errorf("in = %#v; want a HTTPBodyCodec", in)
+	if _, ok := in.(*json.Codec); !ok {
+		t.Errorf("in = %#v; want a json.Codec", in)
 	}
 	out := registry.OutboundForRequest(r)
-	if _, ok := out.(*HTTPBodyCodec); !ok {
-		t.Errorf("out = %#v; want a HTTPBodyCodec", out)
+	if _, ok := out.(*json.Codec); !ok {
+		t.Errorf("out = %#v; want a json.Codec", out)
 	}
 }
 
@@ -674,8 +674,8 @@ func Test_Encoding_InBound_ForResponse_Wildcard(t *testing.T) {
 	resp.Header.Set("Content-Type", "application/unknown")
 
 	out := registry.InboundForResponse(resp)
-	if _, ok := out.(*HTTPBodyCodec); !ok {
-		t.Errorf("out = %#v; want a HTTPBodyCodec", out)
+	if _, ok := out.(*json.Codec); !ok {
+		t.Errorf("out = %#v; want a json.Codec", out)
 	}
 }
 

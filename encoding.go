@@ -8,11 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"google.golang.org/protobuf/encoding/protojson"
-
 	"github.com/things-go/encoding/codec"
 	"github.com/things-go/encoding/form"
-	"github.com/things-go/encoding/jsonpb"
+	"github.com/things-go/encoding/json"
 	"github.com/things-go/encoding/proto"
 )
 
@@ -60,11 +58,11 @@ type Encoding struct {
 //
 //	MIMEPOSTForm: form.Codec
 //	MIMEMultipartPOSTForm: form.MultipartCodec
-//	MIMEJSON: jsonpb.Codec
+//	MIMEJSON: json.Codec
 //	MIMEPROTOBUF: proto.Codec
 //	mimeQuery: form.QueryCodec
 //	mimeUri:   form.UriCodec
-//	mimeWildcard: HTTPBodyCodec
+//	mimeWildcard: json.Codec
 //
 // you can manually register your custom Marshaler.
 //
@@ -79,30 +77,12 @@ func New() *Encoding {
 		mimeMap: map[string]codec.Marshaler{
 			MIMEPOSTForm:          form.New("json"),
 			MIMEMultipartPOSTForm: &form.MultipartCodec{Codec: form.New("json")},
-			MIMEJSON: &jsonpb.Codec{
-				MarshalOptions: protojson.MarshalOptions{
-					UseProtoNames:  true,
-					UseEnumNumbers: true,
-				},
-				UnmarshalOptions: protojson.UnmarshalOptions{
-					DiscardUnknown: true,
-				},
-			},
-			MIMEPROTOBUF: &proto.Codec{},
+			MIMEJSON:              &json.Codec{UseNumber: true, DisallowUnknownFields: true},
+			MIMEPROTOBUF:          &proto.Codec{},
 		},
-		mimeQuery: &form.QueryCodec{Codec: form.New("json")},
-		mimeUri:   &form.UriCodec{Codec: form.New("json")},
-		mimeWildcard: &HTTPBodyCodec{
-			Marshaler: &jsonpb.Codec{
-				MarshalOptions: protojson.MarshalOptions{
-					UseProtoNames:  true,
-					UseEnumNumbers: true,
-				},
-				UnmarshalOptions: protojson.UnmarshalOptions{
-					DiscardUnknown: true,
-				},
-			},
-		},
+		mimeQuery:    &form.QueryCodec{Codec: form.New("json")},
+		mimeUri:      &form.UriCodec{Codec: form.New("json")},
+		mimeWildcard: &json.Codec{UseNumber: true, DisallowUnknownFields: true},
 	}
 }
 
