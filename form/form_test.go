@@ -132,11 +132,6 @@ func TestEncode(t *testing.T) {
 			got, err := codec.Encode(tt.args)
 			assert.NoError(t, err)
 			assert.Equalf(t, tt.want, got, "Encode(%v)", tt.args)
-
-			// got1 := &bytes.Buffer{}
-			// err = codec.NewEncoder(got1).Encode(tt.args)
-			// assert.NoError(t, err)
-			// assert.Equalf(t, tt.want, got1.String(), "Encode(%v)", tt.args)
 		})
 	}
 }
