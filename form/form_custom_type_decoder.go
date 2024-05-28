@@ -102,7 +102,8 @@ func DecodeCustomStringSlice[T ~string](values []string) (any, error) {
 	if len(values) == 0 {
 		return []T{}, nil
 	}
-	ret := make([]T, 0, 32)
+	// FIXME: make slice space
+	ret := make([]T, 0)
 	for _, s := range values {
 		for _, v := range strings.Split(s, ",") {
 			ret = append(ret, T(v))
@@ -115,7 +116,8 @@ func decodeNumber[T constraints.Integer | constraints.Float, V ~uint64 | ~int64 
 	if len(values) == 0 {
 		return []T{}, nil
 	}
-	ret := make([]T, 0, 32)
+	// FIXME: make slice space
+	ret := make([]T, 0)
 	for _, s := range values {
 		for _, v := range strings.Split(s, ",") {
 			i, err := parse(v)

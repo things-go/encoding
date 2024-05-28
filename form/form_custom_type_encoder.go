@@ -37,6 +37,7 @@ func EncodeCustomFloat64Slice[T ~float64](x any) ([]string, error) {
 func EncodeCustomStringSlice[T ~string](x any) ([]string, error) {
 	vs, ok := x.([]T)
 	if !ok {
+		// FIXME: error checking
 		return nil, fmt.Errorf("")
 	}
 	has := false
@@ -57,6 +58,7 @@ func EncodeCustomStringSlice[T ~string](x any) ([]string, error) {
 func encodeCustomNumberSlice[T constraints.Integer | constraints.Float, V uint64 | int64 | float64](x any, format func(V) string) ([]string, error) {
 	vs, ok := x.([]T)
 	if !ok {
+		// FIXME: error checking
 		return nil, fmt.Errorf("")
 	}
 	has := false
