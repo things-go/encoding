@@ -9,24 +9,17 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func RegisterBuiltinTypeDecoderCommaStringToSlice(dec *form.Decoder) {
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[bool](), []bool{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int](), []int{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int8](), []int8{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int16](), []int16{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int32](), []int32{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int64](), []int64{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint](), []uint{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint8](), []uint8{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint16](), []uint16{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint32](), []uint32{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint64](), []uint64{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[float32](), []float32{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[float64](), []float64{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[string](), []string{})
-	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uintptr](), []uintptr{})
-}
+// * encode/decode: custom type number/string slice/array
 
+// RegisterBuiltinTypeEncoderSliceToCommaString register to form.Encoder.
+// encode a slice to a comma-separated string.
+// NOTE: slice element type only support
+//
+// `bool`
+// `int`, `int8`, `int16`, `int32`, `int64`
+// `uint`, `uint8`, `uint16`, `uint32`, `uint64`
+// `float32`, `float64`
+// `string`, `uintptr`
 func RegisterBuiltinTypeEncoderSliceToCommaString(enc *form.Encoder) {
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[bool](), []bool{})
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[int](), []int{})
@@ -45,8 +38,34 @@ func RegisterBuiltinTypeEncoderSliceToCommaString(enc *form.Encoder) {
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[uintptr](), []uintptr{})
 }
 
-//* encoder: custom type number/string slice/array
+// RegisterBuiltinTypeDecoderCommaStringToSlice register to form.Decoder.
+// decode a comma-separated string to slice.
+// NOTE: slice element type only support
+//
+// `bool`
+// `int`, `int8`, `int16`, `int32`, `int64`
+// `uint`, `uint8`, `uint16`, `uint32`, `uint64`
+// `float32`, `float64`
+// `string`, `uintptr`
+func RegisterBuiltinTypeDecoderCommaStringToSlice(dec *form.Decoder) {
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[bool](), []bool{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int](), []int{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int8](), []int8{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int16](), []int16{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int32](), []int32{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[int64](), []int64{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint](), []uint{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint8](), []uint8{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint16](), []uint16{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint32](), []uint32{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uint64](), []uint64{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[float32](), []float32{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[float64](), []float64{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[string](), []string{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[uintptr](), []uintptr{})
+}
 
+// EncodeSlice2CommaString encode a slice to a comma-separated string.
 func EncodeSlice2CommaString[T constraints.Integer | constraints.Float | ~string | ~bool]() func(x any) ([]string, error) {
 	t := reflect.TypeOf([]T{})
 	return func(x any) ([]string, error) {
@@ -54,6 +73,8 @@ func EncodeSlice2CommaString[T constraints.Integer | constraints.Float | ~string
 	}
 }
 
+// EncodeSliceToCommaString encode a slice to a comma-separated string.
+// NOTE: slice element only support `constraints.Integer | constraints.Float | ~string | ~bool`
 func EncodeSliceToCommaString(t reflect.Type, x any) ([]string, error) {
 	if t.Kind() != reflect.Slice {
 		return nil, &form.InvalidEncodeError{Type: t}
@@ -101,8 +122,7 @@ func EncodeSliceToCommaString(t reflect.Type, x any) ([]string, error) {
 	return []string{b.String()}, nil
 }
 
-//* decoder: custom type number/string slice/array
-
+// DecodeCommaString2Slice decode a comma-separated string to a slice.
 func DecodeCommaString2Slice[T constraints.Integer | constraints.Float | ~string | ~bool]() func(values []string) (any, error) {
 	t := reflect.TypeOf([]T{})
 	return func(values []string) (any, error) {
@@ -110,6 +130,8 @@ func DecodeCommaString2Slice[T constraints.Integer | constraints.Float | ~string
 	}
 }
 
+// DecodeCommaString22Slice decode a comma-separated string to a slice.
+// NOTE: slice element only support `constraints.Integer | constraints.Float | ~string | ~bool`
 func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
 	if t.Kind() != reflect.Slice {
 		return nil, &form.InvalidDecoderError{Type: t}
@@ -122,14 +144,14 @@ func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
 	te := t.Elem()
 	teKind := te.Kind()
 	for _, s := range values {
-		eles := strings.Split(s, ",")
-		if oldLen, oldCap := ret.Len(), ret.Cap(); oldCap < oldLen+len(eles) {
-			newCap := growCap(oldCap, oldCap+len(eles))
+		elements := strings.Split(s, ",")
+		if oldLen, oldCap := ret.Len(), ret.Cap(); oldCap < oldLen+len(elements) {
+			newCap := growCap(oldCap, oldCap+len(elements))
 			nret := reflect.MakeSlice(t, oldLen, newCap)
 			reflect.Copy(nret, ret)
 			ret = nret
 		}
-		for _, ss := range eles {
+		for _, ss := range elements {
 			val := reflect.New(te).Elem()
 			switch teKind {
 			case reflect.Bool:

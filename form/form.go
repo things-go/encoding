@@ -53,6 +53,52 @@ func (c *Codec) DisableUseEnumNumbers() *Codec {
 	return c
 }
 
+// RegisterEncoderCustomTypeFunc register to form.Encoder.
+// NOTE: only support form.Encoder
+// NOTE: if not register, the type will use default behavior.
+func (c *Codec) RegisterEncoderCustomTypeFunc(fn func(x any) ([]string, error), types ...any) *Codec {
+	c.Encoder.RegisterCustomTypeFunc(fn, types...)
+	return c
+}
+
+// RegisterEncoderCustomTypeFunc register to form.Encoder.
+// NOTE: only support form.Decoder
+// NOTE: if not register, the type will cause an error.
+func (c *Codec) RegisterDecoderCustomTypeFunc(fn func([]string) (any, error), types ...any) *Codec {
+	c.Decoder.RegisterCustomTypeFunc(fn, types...)
+	return c
+}
+
+// RegisterBuiltinTypeEncoderSliceToCommaString register to form.Encoder.
+// encode a slice to a comma-separated string.
+// NOTE: only support form.Encoder
+// NOTE: slice element type only support
+//
+// `bool`
+// `int`, `int8`, `int16`, `int32`, `int64`
+// `uint`, `uint8`, `uint16`, `uint32`, `uint64`
+// `float32`, `float64`
+// `string`, `uintptr`
+func (c *Codec) RegisterBuiltinTypeEncoderSliceToCommaString() *Codec {
+	RegisterBuiltinTypeEncoderSliceToCommaString(c.Encoder)
+	return c
+}
+
+// RegisterBuiltinTypeDecoderCommaStringToSlice register to form.Decoder.
+// decode a comma-separated string to slice.
+// NOTE: only support form.Encoder
+// NOTE: slice element type only support
+//
+// `bool`
+// `int`, `int8`, `int16`, `int32`, `int64`
+// `uint`, `uint8`, `uint16`, `uint32`, `uint64`
+// `float32`, `float64`
+// `string`, `uintptr`
+func (c *Codec) RegisterBuiltinTypeDecoderCommaStringToSlice() *Codec {
+	RegisterBuiltinTypeDecoderCommaStringToSlice(c.Decoder)
+	return c
+}
+
 // ContentType always Returns "application/x-www-form-urlencoded; charset=utf-8"
 func (*Codec) ContentType(_ any) string {
 	return "application/x-www-form-urlencoded; charset=utf-8"
