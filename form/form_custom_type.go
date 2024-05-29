@@ -102,7 +102,7 @@ func EncodeSliceToCommaString(t reflect.Type, x any) ([]string, error) {
 			val = strconv.FormatBool(fv.Bool())
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			val = strconv.FormatInt(fv.Int(), 10)
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 			val = strconv.FormatUint(fv.Uint(), 10)
 		case reflect.Float32:
 			val = strconv.FormatFloat(fv.Float(), 'f', -1, 32)
@@ -130,6 +130,28 @@ func DecodeCommaString2Slice[T constraints.Integer | constraints.Float | ~string
 	}
 }
 
+var _skipIfEmptyStringAndNumber = map[reflect.Kind]struct{}{
+	reflect.Bool:    {},
+	reflect.Int:     {},
+	reflect.Int8:    {},
+	reflect.Int16:   {},
+	reflect.Int32:   {},
+	reflect.Int64:   {},
+	reflect.Uint:    {},
+	reflect.Uint8:   {},
+	reflect.Uint16:  {},
+	reflect.Uint32:  {},
+	reflect.Uint64:  {},
+	reflect.Float32: {},
+	reflect.Float64: {},
+	reflect.Uintptr: {},
+}
+
+func skipIfEmptyStringAndNumber(k reflect.Kind) bool {
+	_, ok := _skipIfEmptyStringAndNumber[k]
+	return ok
+}
+
 // DecodeCommaString22Slice decode a comma-separated string to a slice.
 // NOTE: slice element only support `constraints.Integer | constraints.Float | ~string | ~bool`
 func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
@@ -144,6 +166,9 @@ func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
 	te := t.Elem()
 	teKind := te.Kind()
 	for _, s := range values {
+		if skipIfEmptyStringAndNumber(teKind) && strings.TrimSpace(s) == "" {
+			continue
+		}
 		elements := strings.Split(s, ",")
 		if oldLen, oldCap := ret.Len(), ret.Cap(); oldCap < oldLen+len(elements) {
 			newCap := growCap(oldCap, oldCap+len(elements))
@@ -152,6 +177,9 @@ func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
 			ret = nret
 		}
 		for _, ss := range elements {
+			if skipIfEmptyStringAndNumber(teKind) && strings.TrimSpace(ss) == "" {
+				continue
+			}
 			val := reflect.New(te).Elem()
 			switch teKind {
 			case reflect.Bool:
@@ -214,7 +242,7 @@ func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
 					return nil, err
 				}
 				val.SetUint(i)
-			case reflect.Uint64:
+			case reflect.Uint64, reflect.Uintptr:
 				i, err := strconv.ParseUint(ss, 10, 64)
 				if err != nil {
 					return nil, err

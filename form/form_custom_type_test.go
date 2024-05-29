@@ -19,6 +19,7 @@ type CustomUint8 uint8
 type CustomUint16 uint16
 type CustomUint32 uint32
 type CustomUint64 uint64
+type CustomUintptr uintptr
 type CustomFloat32 float32
 type CustomFloat64 float64
 type CustomString string
@@ -35,6 +36,7 @@ type customCodecValue struct {
 	U16  []uint16        `json:"u16"`
 	U32  []uint32        `json:"u32"`
 	U64  []uint64        `json:"u64"`
+	Up   []uintptr       `json:"up"`
 	F32  []float32       `json:"f32"`
 	F64  []float64       `json:"f64"`
 	S    []string        `json:"s"`
@@ -49,6 +51,7 @@ type customCodecValue struct {
 	Cu16 []CustomUint16  `json:"cu16"`
 	Cu32 []CustomUint32  `json:"cu32"`
 	Cu64 []CustomUint64  `json:"cu64"`
+	Cup  []CustomUintptr `json:"cup"`
 	Cf32 []CustomFloat32 `json:"cf32"`
 	Cf64 []CustomFloat64 `json:"cf64"`
 	Cs   []CustomString  `json:"cs"`
@@ -70,6 +73,7 @@ var testCodecValue = customCodecValue{
 	U16:    []uint16{1611, 1622, 1633},
 	U32:    []uint32{3211, 3222, 3233},
 	U64:    []uint64{6411, 6422, 6433},
+	Up:     []uintptr{99991, 99992, 99993},
 	F32:    []float32{1.1, 1.2, 1.3},
 	F64:    []float64{2.1, 2.2, 2.3},
 	S:      []string{"a", "b", "c", "d", "e", "f"},
@@ -84,6 +88,7 @@ var testCodecValue = customCodecValue{
 	Cu16:   []CustomUint16{1611, 1622, 1633},
 	Cu32:   []CustomUint32{3211, 3222, 3233},
 	Cu64:   []CustomUint64{6411, 6422, 6433},
+	Cup:    []CustomUintptr{99991, 99992, 99993},
 	Cf32:   []CustomFloat32{1.1, 1.2, 1.3},
 	Cf64:   []CustomFloat64{2.1, 2.2, 2.3},
 	Cs:     []CustomString{"a", "b", "c"},
@@ -104,6 +109,7 @@ var testDecoderUrlValues = url.Values{
 	"u16":  []string{"1611,1622,1633"},
 	"u32":  []string{"3211,3222,3233"},
 	"u64":  []string{"6411,6422,6433"},
+	"up":   []string{"99991", "99992", "99993"},
 	"f32":  []string{"1.1,1.2,1.3"},
 	"f64":  []string{"2.1,2.2,2.3"},
 	"s":    []string{"a,b,c", "d,e,f"},
@@ -118,6 +124,7 @@ var testDecoderUrlValues = url.Values{
 	"cu16": []string{"1611,1622,1633"},
 	"cu32": []string{"3211,3222,3233"},
 	"cu64": []string{"6411,6422,6433"},
+	"cup":  []string{"99991", "99992", "99993"},
 	"cf32": []string{"1.1,1.2,1.3"},
 	"cf64": []string{"2.1,2.2,2.3"},
 	"cs":   []string{"a,b,c"},
@@ -139,6 +146,7 @@ var testEncoderUrlValues = url.Values{
 	"u16":  []string{"1611,1622,1633"},
 	"u32":  []string{"3211,3222,3233"},
 	"u64":  []string{"6411,6422,6433"},
+	"up":   []string{"99991,99992,99993"},
 	"f32":  []string{"1.1,1.2,1.3"},
 	"f64":  []string{"2.1,2.2,2.3"},
 	"s":    []string{"a,b,c,d,e,f"},
@@ -153,6 +161,7 @@ var testEncoderUrlValues = url.Values{
 	"cu16": []string{"1611,1622,1633"},
 	"cu32": []string{"3211,3222,3233"},
 	"cu64": []string{"6411,6422,6433"},
+	"cup":  []string{"99991,99992,99993"},
 	"cf32": []string{"1.1,1.2,1.3"},
 	"cf64": []string{"2.1,2.2,2.3"},
 	"cs":   []string{"a,b,c"},
@@ -178,6 +187,7 @@ func Test_CustomType_Encoder(t *testing.T) {
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomUint16](), []CustomUint16{})
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomUint32](), []CustomUint32{})
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomUint64](), []CustomUint64{})
+	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomUintptr](), []CustomUintptr{})
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomFloat32](), []CustomFloat32{})
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomFloat64](), []CustomFloat64{})
 	enc.RegisterCustomTypeFunc(EncodeSlice2CommaString[CustomString](), []CustomString{})
@@ -221,6 +231,7 @@ func Test_CustomType_Decoder(t *testing.T) {
 	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomUint16](), []CustomUint16{})
 	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomUint32](), []CustomUint32{})
 	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomUint64](), []CustomUint64{})
+	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomUintptr](), []CustomUintptr{})
 	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomFloat32](), []CustomFloat32{})
 	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomFloat64](), []CustomFloat64{})
 	dec.RegisterCustomTypeFunc(DecodeCommaString2Slice[CustomString](), []CustomString{})
@@ -245,6 +256,24 @@ func Test_CustomType_Decoder(t *testing.T) {
 		require.Error(t, err)
 		t.Log(err)
 	})
+	t.Run("skip if empty string and number type", func(t *testing.T) {
+		type Custom struct {
+			A []int `json:"a"`
+		}
+		got1 := Custom{}
+		err := dec.Decode(&got1, url.Values{
+			"a": []string{""},
+		})
+		require.NoError(t, err)
+		require.Equal(t, Custom{A: []int{}}, got1)
+
+		got2 := Custom{}
+		err = dec.Decode(&got2, url.Values{
+			"a": []string{"1,,3"},
+		})
+		require.NoError(t, err)
+		require.Equal(t, Custom{A: []int{1, 3}}, got2)
+	})
 
 	t.Run("invalid value", func(t *testing.T) {
 		got := customCodecValue{}
@@ -253,4 +282,5 @@ func Test_CustomType_Decoder(t *testing.T) {
 		})
 		require.Error(t, err)
 	})
+
 }
