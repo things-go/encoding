@@ -282,5 +282,4 @@ func Test_CustomType_Decoder(t *testing.T) {
 		})
 		require.Error(t, err)
 	})
-
 }
