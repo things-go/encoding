@@ -76,7 +76,7 @@ func New() *Encoding {
 		mimeMap: map[string]codec.Marshaler{
 			MIMEPOSTForm:          form.New("json"),
 			MIMEMultipartPOSTForm: &form.MultipartCodec{Codec: form.New("json")},
-			MIMEJSON:              &json.Codec{UseNumber: true, DisallowUnknownFields: true},
+			MIMEJSON:              &json.Codec{UseNumber: true, DisallowUnknownFields: false},
 		},
 		mimeQuery:    &form.QueryCodec{Codec: form.New("json")},
 		mimeUri:      &form.UriCodec{Codec: form.New("json")},
