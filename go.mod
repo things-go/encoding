@@ -7,7 +7,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/pelletier/go-toml/v2 v2.2.2
 	github.com/spf13/cast v1.7.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/ugorji/go/codec v1.2.12
 	golang.org/x/exp v0.0.0-20240525044651-4c93da0ed11d
 	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be
