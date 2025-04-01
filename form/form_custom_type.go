@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/form/v4"
-	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/constraints" // nolint: exptostd
 )
 
 // * encode/decode: custom type number/string slice/array
@@ -97,7 +97,7 @@ func EncodeSliceToCommaString(t reflect.Type, x any) ([]string, error) {
 	for i := 0; i < vx.Len(); i++ {
 		fv := vx.Index(i)
 		val := ""
-		switch teKind {
+		switch teKind { // nolint: exhaustive
 		case reflect.Bool:
 			val = strconv.FormatBool(fv.Bool())
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -181,7 +181,7 @@ func DecodeCommaString22Slice(t reflect.Type, values []string) (any, error) {
 				continue
 			}
 			val := reflect.New(te).Elem()
-			switch teKind {
+			switch teKind { // nolint: exhaustive
 			case reflect.Bool:
 				i, err := strconv.ParseBool(ss)
 				if err != nil {

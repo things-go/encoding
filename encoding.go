@@ -141,7 +141,7 @@ func (r *Encoding) Delete(mime string) error {
 	if mime == MIMEWildcard ||
 		mime == MIMEQuery ||
 		mime == MIMEURI {
-		return fmt.Errorf("encoding: MIME(%s) can't delete, but you can override it.", mime)
+		return fmt.Errorf("encoding: MIME(%s) can't delete, but you can override it", mime)
 	}
 	delete(r.mimeMap, mime)
 	return nil

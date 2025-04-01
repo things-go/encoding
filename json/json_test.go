@@ -90,7 +90,7 @@ func TestCodec_Unmarshal(t *testing.T) {
 		t.Errorf("m.Unmarshal(%q, got) failed with %v; want success", data, err)
 	}
 	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
-		t.Errorf(diff)
+		t.Error(diff)
 	}
 }
 

@@ -80,7 +80,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 
 func getFieldDescriptor(v protoreflect.Message, fieldName string) protoreflect.FieldDescriptor {
 	var fields = v.Descriptor().Fields()
-	var fd protoreflect.FieldDescriptor = getDescriptorByFieldAndName(fields, fieldName)
+	var fd = getDescriptorByFieldAndName(fields, fieldName)
 	if fd == nil {
 		switch {
 		case v.Descriptor().FullName() == structMessageFullname:

@@ -74,7 +74,7 @@ func Test_Encoding_Register(t *testing.T) {
 func Test_Encoding_Inbound_Or_OutBound_ForRequest_Wildcard(t *testing.T) {
 	var registry = New()
 
-	r, err := http.NewRequest("GET", "http://example.com", nil)
+	r, err := http.NewRequest("GET", "http://example.com", nil) // nolint: noctx
 	if err != nil {
 		t.Fatalf(`http.NewRequest("GET", "http://example.com", nil) failed with %v; want success`, err)
 	}
@@ -133,7 +133,7 @@ func Test_Encoding_Inbound_Or_OutBound_ForRequest_NotWildcard(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			r, err := http.NewRequest("GET", "http://example.com", nil)
+			r, err := http.NewRequest("GET", "http://example.com", nil) // nolint: noctx
 			if err != nil {
 				t.Fatalf(`http.NewRequest("GET", "http://example.com", nil) failed with %v; want success`, err)
 			}
@@ -243,7 +243,7 @@ func Test_Encoding_Bind(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
-				r, err := http.NewRequest(http.MethodPost, "http://example.com", bytes.NewReader(b))
+				r, err := http.NewRequest(http.MethodPost, "http://example.com", bytes.NewReader(b)) // nolint: noctx
 				if err != nil {
 					return nil, err
 				}
@@ -337,7 +337,7 @@ func Test_Encoding_Bind(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
-				r, err := http.NewRequest(http.MethodPost, "http://example.com", buf)
+				r, err := http.NewRequest(http.MethodPost, "http://example.com", buf) // nolint: noctx
 				if err != nil {
 					return nil, err
 				}
@@ -382,7 +382,7 @@ func Test_Encoding_Bind(t *testing.T) {
 		{
 			"toml",
 			func() (*http.Request, error) {
-				r, err := http.NewRequest(http.MethodPost, "http://example.com", bytes.NewReader([]byte("id=\"foo\"\nname=\"bar\"")))
+				r, err := http.NewRequest(http.MethodPost, "http://example.com", bytes.NewReader([]byte("id=\"foo\"\nname=\"bar\""))) // nolint: noctx
 				if err != nil {
 					return nil, err
 				}
@@ -409,7 +409,7 @@ func Test_Encoding_Bind(t *testing.T) {
 					return nil, err
 				}
 
-				r, err := http.NewRequest(http.MethodPost, "http://example.com", buf)
+				r, err := http.NewRequest(http.MethodPost, "http://example.com", buf) // nolint: noctx
 				if err != nil {
 					return nil, err
 				}
@@ -596,7 +596,7 @@ func Test_Encoding_Render(t *testing.T) {
 			args{
 				w: httptest.NewRecorder(),
 				genReq: func() (*http.Request, error) {
-					return http.NewRequest(http.MethodGet, "http://example.com", nil)
+					return http.NewRequest(http.MethodGet, "http://example.com", nil) // nolint: noctx
 				},
 				v: nil,
 			},
@@ -609,7 +609,7 @@ func Test_Encoding_Render(t *testing.T) {
 			args{
 				w: httptest.NewRecorder(),
 				genReq: func() (*http.Request, error) {
-					req, err := http.NewRequest(http.MethodPost, "http://example.com", nil)
+					req, err := http.NewRequest(http.MethodPost, "http://example.com", nil) // nolint: noctx
 					if err != nil {
 						return nil, err
 					}
